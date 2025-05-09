@@ -1,0 +1,36 @@
+/* Keep all your original timer styles */
+/* Add these new styles at the bottom: */
+
+/* Landing Page Styles */
+.landing-container {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: 0 auto;
+  transition: all 0.5s ease;
+}
+
+/* Task Form Styles */
+.time-option.selected {
+  background: #4ecdc4;
+  color: white;
+}
+
+/* Task Timer Styles */
+.task-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+/* View Transition Styles */
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: block !important;
+}

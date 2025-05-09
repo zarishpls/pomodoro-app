@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Flow - Pomodoro Timer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Original Styles (unchanged) */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      width: 350px;
+      max-width: 90%;
+    }
+
+    .timer {
+      font-size: 4rem;
+      margin: 1rem 0;
+      font-family: monospace;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+      transform: translateY(-1px);
+    }
+
+    .session-counter {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+    }
+
+    /* New Landing Page Styles (matching original aesthetic) */
+    .mode-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .mode-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .mode-btn i {
+      font-size: 1.2rem;
+    }
+
+    .pomodoro-mode {
+      background: #007bff;
+    }
+
+    .task-mode {
+      background: #28a745;
+    }
+
+    /* Task Form Styles */
+    .task-form {
+      text-align: left;
+      margin-top: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .time-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .time-option {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .time-option:hover {
+      border-color: #007bff;
+    }
+
+    .time-option.selected {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    /* View Transitions */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Task Info Display */
+    .task-info {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 5px;
+      margin-bottom: 1.5rem;
+    }
+
+    .task-name {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .task-estimate {
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Landing View -->
+    <div class="view active" id="landingView">
+      <h1>Focus Flow</h1>
+      <p>Select your focus mode:</p>
+      
+      <div class="mode-selector">
+        <button class="mode-btn pomodoro-mode" id="standardModeBtn">
+          <i class="fas fa-clock"></i> Standard Pomodoro
+        </button>
+        <button class="mode-btn task-mode" id="taskModeBtn">
+          <i class="fas fa-tasks"></i> Task-Based Timer
+        </button>
+      </div>
+    </div>
+
+    <!-- Task Form View -->
+    <div class="view" id="taskFormView">
+      <h1>Create Task</h1>
+      
+      <div class="task-form">
+        <div class="form-group">
+          <label for="taskName">Task Name</label>
+          <input type="text" id="taskName" placeholder="e.g. Write report">
+        </div>
+        
+        <div class="form-group">
+          <label>Estimated Time</label>
+          <div class="time-options" id="timeOptions">
+            <div class="time-option" data-value="0.5">30 min</div>
+            <div class="time-option" data-value="1">1 hour</div>
+            <div class="time-option" data-value="1.5">1.5 hours</div>
+            <div class="time-option" data-value="2">2 hours</div>
+            <div class="time-option" data-value="2.5">2.5 hours</div>
+            <div class="time-option" data-value="3">3 hours</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="controls">
+        <button id="startTaskBtn" class="task-mode">
+          <i class="fas fa-play"></i> Start Task
+        </button>
+        <button id="backToLandingBtn" style="margin-top: 1rem;">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Standard Timer View -->
+    <div class="view" id="standardTimerView">
+      <div class="settings-toggle">
+        <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+      </div>
+      <h1>Pomodoro Timer</h1>
+      
+      <div class="timer-display">
+        <div class="timer" id="timer">25:00</div>
+        <div class="timer-label" id="timerLabel">Focus Time</div>
+      </div>
+      
+      <div class="controls">
+        <button id="startBtn"><i class="fas fa-play"></i> Start</button>
+        <button id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
+        <button id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+      </div>
+      
+      <div class="session-counter">Sessions: <span id="sessions">0</span></div>
+      
+      <div class="settings-panel" id="settingsPanel" style="display: none;">
+        <h3>Timer Settings</h3>
+        <div class="form-group">
+          <label for="focusTime">Focus Time (minutes):</label>
+          <input type="number" id="focusTime" min="1" max="60" value="25">
+        </div>
+        <div class="form-group">
+          <label for="breakTime">Break Time (minutes):</label>
+          <input type="number" id="breakTime" min="1" max="30" value="5">
+        </div>
+        <button id="saveSettings">Save Settings</button>
+      </div>
+      
+      <button id="backToLandingFromTimer" style="margin-top: 1rem;">
+        <i class="fas fa-arrow-left"></i> Back to Menu
+      </button>
+    </div>
+
+    <!-- Task Timer View -->
+    <div class="view" id="taskTimerView">
+      <div class="task-info">
+        <div class="task-name" id="currentTaskName">Working on: Report</div>
+        <div class="task-estimate" id="currentTaskEstimate">Estimated: 2 hours</div>
+      </div>
+      
+      <div class="timer-display">
+        <div class="timer" id="taskTimerDisplay">25:00</div>
+        <div class="timer-label" id="taskTimerLabel">Focus Time</div>
+      </div>
+      
+      <div class="controls">
+        <button id="taskStartBtn"><i class="fas fa-play"></i> Start</button>
+        <button id="taskPauseBtn"><i class="fas fa-pause"></i> Pause</button>
+        <button id="taskResetBtn"><i class="fas fa-redo"></i> Reset</button>
+      </div>
+      
+      <div class="session-counter">Sessions: <span id="taskSessions">0</span></div>
+      
+      <button id="backToLandingFromTaskTimer" style="margin-top: 1rem;">
+        <i class="fas fa-arrow-left"></i> Back to Menu
+      </button>
+    </div>
+  </div>
+
+  <audio id="timerSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
+
+  <script>
+    // View Management
+    const views = {
+      landing: document.getElementById('landingView'),
+      taskForm: document.getElementById('taskFormView'),
+      standardTimer: document.getElementById('standardTimerView'),
+      taskTimer: document.getElementById('taskTimerView')
+    };
+
+    function showView(view) {
+      Object.values(views).forEach(v => v.classList.remove('active'));
+      view.classList.add('active');
+    }
+
+    // Navigation
+    document.getElementById('standardModeBtn').addEventListener('click', () => showView(views.standardTimer));
+    document.getElementById('taskModeBtn').addEventListener('click', () => showView(views.taskForm));
+    document.getElementById('backToLandingBtn').addEventListener('click', () => showView(views.landing));
+    document.getElementById('backToLandingFromTimer').addEventListener('click', () => showView(views.landing));
+    document.getElementById('backToLandingFromTaskTimer').addEventListener('click', () => showView(views.landing));
+
+    // Time Selection
+    document.querySelectorAll('.time-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.time-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+      });
+    });
+
+    // Task Form Submission
+    document.getElementById('startTaskBtn').addEventListener('click', function() {
+      const taskName = document.getElementById('taskName').value.trim();
+      const selectedOption = document.querySelector('.time-option.selected');
+      
+      if (!taskName) {
+        alert('Please enter a task name');
+        return;
+      }
+      
+      if (!selectedOption) {
+        alert('Please select an estimated time');
+        return;
+      }
+      
+      const estimatedHours = parseFloat(selectedOption.dataset.value);
+      document.getElementById('currentTaskName').textContent = `Working on: ${taskName}`;
+      document.getElementById('currentTaskEstimate').textContent = `Estimated: ${estimatedHours} hour${estimatedHours !== 1 ? 's' : ''}`;
+      
+      showView(views.taskTimer);
+    });
+
+    // ... (Include your original timer JavaScript here) ...
+  </script>
+</body>
+</html>
