@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Focus Flow - Pomodoro Timer</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
   <style>
     /* Original Styles (unchanged) */
     body {
@@ -163,6 +164,36 @@
       color: #666;
       font-size: 0.9rem;
     }
+    
+    /* Timer state styles */
+    .timer-complete {
+      color: #28a745;
+      animation: pulse 1s;
+    }
+    
+    .timer-warning {
+      color: #dc3545;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .settings-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    
+    .settings-panel {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #f9f9f9;
+    }
   </style>
 </head>
 <body>
@@ -281,60 +312,8 @@
 
   <audio id="timerSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
 
-  <script>
-    // View Management
-    const views = {
-      landing: document.getElementById('landingView'),
-      taskForm: document.getElementById('taskFormView'),
-      standardTimer: document.getElementById('standardTimerView'),
-      taskTimer: document.getElementById('taskTimerView')
-    };
-
-    function showView(view) {
-      Object.values(views).forEach(v => v.classList.remove('active'));
-      view.classList.add('active');
-    }
-
-    // Navigation
-    document.getElementById('standardModeBtn').addEventListener('click', () => showView(views.standardTimer));
-    document.getElementById('taskModeBtn').addEventListener('click', () => showView(views.taskForm));
-    document.getElementById('backToLandingBtn').addEventListener('click', () => showView(views.landing));
-    document.getElementById('backToLandingFromTimer').addEventListener('click', () => showView(views.landing));
-    document.getElementById('backToLandingFromTaskTimer').addEventListener('click', () => showView(views.landing));
-
-    // Time Selection
-    document.querySelectorAll('.time-option').forEach(option => {
-      option.addEventListener('click', function() {
-        document.querySelectorAll('.time-option').forEach(opt => {
-          opt.classList.remove('selected');
-        });
-        this.classList.add('selected');
-      });
-    });
-
-    // Task Form Submission
-    document.getElementById('startTaskBtn').addEventListener('click', function() {
-      const taskName = document.getElementById('taskName').value.trim();
-      const selectedOption = document.querySelector('.time-option.selected');
-      
-      if (!taskName) {
-        alert('Please enter a task name');
-        return;
-      }
-      
-      if (!selectedOption) {
-        alert('Please select an estimated time');
-        return;
-      }
-      
-      const estimatedHours = parseFloat(selectedOption.dataset.value);
-      document.getElementById('currentTaskName').textContent = `Working on: ${taskName}`;
-      document.getElementById('currentTaskEstimate').textContent = `Estimated: ${estimatedHours} hour${estimatedHours !== 1 ? 's' : ''}`;
-      
-      showView(views.taskTimer);
-    });
-
-    // ... (Include your original timer JavaScript here) ...
-  </script>
+  <!-- Load JavaScript -->
+  <script src="task.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
